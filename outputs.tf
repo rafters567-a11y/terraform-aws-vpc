@@ -27,3 +27,18 @@ output "private_route_table_id" {
   description = "ID of the private route table"
   value       = aws_route_table.private.id
 }
+
+output "workspace" {
+  description = "Active workspace"
+  value       = terraform.workspace
+}
+
+output "instance_id" {
+  description = "ID of the app instance"
+  value       = aws_instance.app.id
+}
+
+output "instance_type" {
+  description = "Instance type used in this workspace"
+  value       = aws_instance.app.instance_type
+}

@@ -45,3 +45,12 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "instance_types" {
+  description = "EC2 instance type for each workspace"
+  type        = map(string)
+  default = {
+    dev  = "t3.micro"
+    prod = "t3.small"
+  }
+}

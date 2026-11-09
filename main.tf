@@ -35,8 +35,9 @@ locals {
   azs = slice(data.aws_availability_zones.available.names, 0, length(var.public_subnet_cidrs))
 
   common_tags = merge({
-    Project   = var.project_name
-    ManagedBy = "terraform"
+    Project     = var.project_name
+    ManagedBy   = "terraform"
+    Environment = terraform.workspace
   }, var.tags)
 }
 
@@ -46,14 +47,14 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
   enable_dns_hostnames = true
 
-  tags = merge(local.common_tags, { Name = "${var.project_name}-vpc" })
+  tags = merge(local.common_tags, { Name = "${var.project_name}-${terraform.workspace}-vpc" })
 }
 
 # ---------------- Internet Gateway ----------------
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 
-  tags = merge(local.common_tags, { Name = "${var.project_name}-igw" })
+  tags = merge(local.common_tags, { Name = "${var.project_name}-${terraform.workspace}-igw" })
 }
 
 # ---------------- Subnets ----------------
@@ -66,7 +67,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = merge(local.common_tags, {
-    Name = "${var.project_name}-public-${count.index + 1}"
+    Name = "${var.project_name}-${terraform.workspace}-public-${count.index + 1}"
     Tier = "public"
   })
 }
@@ -79,7 +80,7 @@ resource "aws_subnet" "private" {
   availability_zone = local.azs[count.index]
 
   tags = merge(local.common_tags, {
-    Name = "${var.project_name}-private-${count.index + 1}"
+    Name = "${var.project_name}-${terraform.workspace}-private-${count.index + 1}"
     Tier = "private"
   })
 }
@@ -93,14 +94,14 @@ resource "aws_route_table" "public" {
     gateway_id = aws_internet_gateway.igw.id
   }
 
-  tags = merge(local.common_tags, { Name = "${var.project_name}-public-rt" })
+  tags = merge(local.common_tags, { Name = "${var.project_name}-${terraform.workspace}-public-rt" })
 }
 
 # Private route table: local VPC traffic only (add a NAT gateway route later if needed)
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
-  tags = merge(local.common_tags, { Name = "${var.project_name}-private-rt" })
+  tags = merge(local.common_tags, { Name = "${var.project_name}-${terraform.workspace}-private-rt" })
 }
 
 resource "aws_route_table_association" "public" {
